@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Forecast Fetcher</title>
+    <script>
+
+      <!-- Create URL to access Dark Sky proxy API. Requests forecast at specified coordinates.-->
+      var data_url = "https://cooper-union-weather-proxy-darksky.glitch.me/forecast?lat="+ lat + "&lon=" + lon";
+      fetch(data_url).then((response)=>{return response.json()}).then((response)=>{
+
+        <!-- Parse response.-->
+        var temperatureMessage =  response.currently.temperature;;
+        document.getElementById("temperature").insertAdjacentHTML("beforeend", temperatureMessage);
+
+        <!-- Create image tag.-->
+       var imageTag = '<img src="'+response.current_observation.icon_url+'" />';
+
+        <!-- Append image tag to element with ID temperature.-->
+        document.getElementById("temperature").insertAdjacentHTML("beforeend", imageTag);        
+      });
+      
+    </script>
+  </head>
+  <body>
+
+    <div id="temperature"></div>
+
+  </body>
+</html>

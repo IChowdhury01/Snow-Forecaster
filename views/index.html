@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Snow Forecaster</title>
+     <link rel="stylesheet" href="/styles/style.css">
+    <script>
+      <!-- Toggles a container's display-->
+      function toggleWait(){
+        var off=document.getElementById('wait');
+        if (off.style.display == "none") {
+            off.style.display = "block";
+        } else {
+            off.style.display = "none";
+        }   
+      }
+      
+      <!-- Prompt user for forecast coordinates. -->
+      var lat = prompt("Enter the latitude coordinate of your target location.");
+      var lon = prompt("Enter the longitude coordinate of your target location.");
+      
+      <!-- Use coordinates to create URL for Dark Sky API proxy. -->
+      var data_url = "https://cooper-union-weather-proxy-darksky.glitch.me/forecast?lat="+ lat + "&lon=" + lon;
+      <!-- Send HTTP request to API. -->
+      var request = new XMLHttpRequest();
+      request.addEventListener("load", function(){
+        toggleWait();  <!-- Make "Please wait..." text disappear.
+          
+        <!-- Parse response.-->
+        var response = JSON.parse(this.response);
+        var dataset = response.daily.data;   <!-- All data for the weekly forecast. -->
+             
+        <!-- Store precipitation prediction for each day. If no precipitation is predicted, store the forecast summary.--> 
+        <!-- Precip[0] is the forecast for today, Precip [1] for tomorrow, ... 7 day forecast.-->
+        var precip = [""];
+        for (i = 0; i < 8; i++) {
+          if(dataset[i].precipType == undefined) {
+            precip[i] = dataset[i].summary;
+          }
+          else {
+            precip[i] = dataset[i].precipType;
+          }
+        }
+                                
+        <!-- Find the first day where snow is predicted to occur.->
+        var firstSnowIndex;
+        var len = precip.length;
+        for (i = 0; i < len; i++) {
+          var forecast = precip[i];
+          if (forecast.localeCompare("snow") == 0) {
+            firstSnowIndex = i;
+            break;
+          }
+        }
+        
+        
+        <!-- Extract other useful forecast information-->         
+        if (firstSnowIndex >= 0) { 
+          <!-- Convert Epoch timestamp to day of the week.-->
+          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+          var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+          var timestamp = dataset[firstSnowIndex].time;
+          var date = new Date(timestamp*1000);
+          var formattedDate = days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate();
+         
+          if (firstSnowIndex == 0) {
+            firstSnowDay = "Today: " + formattedDate;
+          } else if (firstSnowIndex == 1) {
+            firstSnowDay = "Tomorrow: " + formattedDate;
+          } else {
+            firstSnowDay = formattedDate;
+          }
+          
+                    
+          <!-- Store forecast data for first day of snow-->
+          var firstSnowForecast = {
+            day: firstSnowDay,
+            forecast: dataset[firstSnowIndex].summary,
+            probabilityOfSnow: dataset[firstSnowIndex].precipProbability,
+            inchesOfSnow: dataset[firstSnowIndex].precipAccumulation,
+            snowIntensity: dataset[firstSnowIndex].precipIntensity,  <!--meters/hour>
+            
+            lowestTempFahrenheit: dataset[firstSnowIndex].temperatureLow,
+            humidityPercent: dataset[firstSnowIndex].humidity,
+          };
+          
+          <!-- Display forecast-->
+          document.getElementById("result").insertAdjacentHTML("beforeend","<h1 style='color:aqua'>It will snow within the next week!</h1>");
+          document.getElementById("photo").insertAdjacentHTML("beforeend","<img src='https://i.pinimg.com/originals/73/98/31/739831759e8612898ef4aecb2d5000ee.jpg'>");
+          document.getElementById("stats").insertAdjacentHTML("beforeend", "<h2 style='color:aqua'>" + firstSnowForecast.day + "</h2>" + "<p>Forecast: " + firstSnowForecast.forecast + "</p>" + "<p>Probability of snow: " + firstSnowForecast.probabilityOfSnow*100 + "%</p>" + "<p>Depth: " + firstSnowForecast.inchesOfSnow + " inches</p>" + "<p>Intensity: " + (firstSnowForecast.snowIntensity*1000).toFixed(2) + " millimeters/hour</p>" + "<p>Lowest temperature: " + firstSnowForecast.lowestTempFahrenheit + "°F</p>" + "<p>Humidity: " + firstSnowForecast.humidityPercent + "%</p>");
+        }
+        
+        <!-- Display that it won't snow next week.-->
+        else {
+          document.getElementById("result").insertAdjacentHTML("beforeend","<h1 style='color:orange'>It will not snow within the next week.</h1>" + "<br>" + "<img src='https://previews.123rf.com/images/ganchaonan/ganchaonan1812/ganchaonan181200062/113952834-sunny-background-blue-sky-with-white-clouds-and-sun-the-natural-blue-background-has-a-breeze-on-a-br.jpg'>");
+        }    
+      });
+      request.open("GET", data_url);
+      request.send();
+     
+
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>
+        Snow Forecaster
+      </h1>
+    </header>
+    
+    <nav></nav>
+    
+    <main>
+      <section class = "description">
+        <p>
+          This website determines whether it will snow in the location you entered within the next week.
+        </p>
+        <div id = "input">
+          
+        </div>
+      </section>
+      
+      <section class = "processing" id = "wait">
+        <p>
+          Please wait...
+        </p>
+      </section>
+      
+      <section class = "post-result">
+        <div id = "result">
+        </div>
+        <div id = "stats">
+          
+        </div>
+        <div id = "photo">
+          
+        </div>
+      </section>
+    </main>
+    
+    <footer></footer>
+    
+  </body>
+</html>
