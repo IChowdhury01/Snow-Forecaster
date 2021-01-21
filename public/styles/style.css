@@ -1,0 +1,46 @@
+body {
+  font-family: Snell Roundhand, cursive;
+  margin: 2em;
+}
+
+header {
+  width: 100%;
+  text-align: center;
+}
+
+nav {
+  width: 100%;
+}
+
+main {
+  width: 100%;
+}
+
+footer {
+  width: 100%;
+}
+
+.post-result img {
+  max-width:100%;
+  max-height:100%;
+}
+
+.description {
+  text-align: center;
+}
+
+#wait {
+  text-align: center;
+}
+
+#result {
+  text-align: center;
+}
+
+#photo {
+  text-align: center;
+}
+
+#stats {
+  border: 1px dotted black;
+}
